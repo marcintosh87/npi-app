@@ -96,7 +96,7 @@ function App() {
     setProviderData([]);
   };
   return (
-    <Container className="App" maxWidth="xlg">
+    <Container className="App" maxWidth="lg">
       <Box className="App-header">
         <img src={logo} alt="" className="App-logo" />
       </Box>
@@ -180,7 +180,7 @@ function App() {
                   <TableCell align="left">Taxonomy</TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody>
+              <TableBody className="fade-in">
                 {uniqueTable.map((provider) => (
                   <NpiTable
                     key={provider.number}
