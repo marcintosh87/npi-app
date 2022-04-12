@@ -35,3 +35,24 @@
   display: flex;
   flex-direction: row;
 }
+
+#npi-form .form-text-field {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  margin-right: 3rem;
+}
+
+/* slide to top animation for table cells */
+.slide-top {
+  animation: slide-top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes slide-top {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100px);
+  }
+}

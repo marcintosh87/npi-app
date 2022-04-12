@@ -1,6 +1,7 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Container,
@@ -21,32 +22,44 @@ import logo from "./img/NPI Search-logos_transparent.png";
 
 function App() {
   const [providerData, setProviderData] = useState([]);
+  const [hideAlert, setHideAlert] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [npi, setNpi] = useState();
 
   const apiURL = `http://localhost:3000/providers_search/`;
 
+  // handles on change for NPI search form
   const handleInput = (e) => {
     setNpi(e.target.value);
   };
 
   const handleSubmit = (e) => {
-    setLoading(true);
     e.preventDefault();
-    fetch(`${apiURL}${npi}`)
-      .then((res) => {
+    const regEx = /^[0-9]*$/; //checking for numeric inputs only
+    if (npi.length === 10 && regEx.test(npi)) {
+      setLoading(true);
+
+      fetch(`${apiURL}${npi}`).then((res) => {
         if (res.ok) {
-          res.json().then((data) => {
-            setProviderData(data.results.concat(providerData));
-            setLoading(false);
-          });
+          res
+            .json()
+            .then((data) => {
+              setProviderData(data.results.concat(providerData));
+              setLoading(false);
+              setNpi("");
+            })
+            .catch((err) => {
+              setError(err);
+              setHideAlert(false);
+              setNpi("");
+            });
         }
-      })
-      .catch((err) => {
-        setError(err);
-        console.log(error);
       });
+    } else {
+      setHideAlert(false);
+      setTimeout(() => setHideAlert(true), 3000);
+    }
   };
   // prevents duplicate keys in table shown
   const uniqueTable = providerData.filter((value, index) => {
@@ -58,12 +71,11 @@ function App() {
       })
     );
   });
-  // Local Storage Section Check
+  // ------Local Storage Section -------
   // Runs on page load to check for stored sessions
   useEffect(() => {
     if (localStorage.getItem("queries")) {
       setProviderData(JSON.parse(localStorage.getItem("queries")));
-      console.log(providerData);
     }
   }, []);
 
@@ -82,14 +94,25 @@ function App() {
         <img src={logo} alt="" className="App-logo" />
       </Box>
       <Box id="npi-form" my={3} onSubmit={handleSubmit} component="form">
-        <TextField
-          id="npi-input"
-          label="NPI"
-          variant="filled"
-          onChange={handleInput}
-          required
-          sx={{ width: "50%", marginRight: 3 }}
-        />
+        <div className="form-text-field">
+          <TextField
+            id="npi-input"
+            label="NPI"
+            variant="filled"
+            value={npi}
+            onChange={handleInput}
+            required
+          />
+          {!hideAlert ? (
+            <Alert severity="error">
+              Your input is invalid, NPI must be a number and 10 characters
+              long.
+            </Alert>
+          ) : (
+            ""
+          )}
+        </div>
+
         <Box mt={1}>
           <Button type="submit" variant="contained" endIcon={<SearchIcon />}>
             Search
