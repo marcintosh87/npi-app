@@ -16,6 +16,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import NpiTable from "./NpiTable";
 import SearchIcon from "@mui/icons-material/Search";
+import DeleteIcon from "@mui/icons-material/Delete";
 import logo from "./img/NPI Search-logos_transparent.png";
 
 function App() {
@@ -23,9 +24,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [npi, setNpi] = useState();
-  const [table, setTable] = useState([]);
 
-  const apiURL = `http://127.0.0.1:3000/providers_search/`;
+  const apiURL = `http://localhost:3000/providers_search/`;
 
   const handleInput = (e) => {
     setNpi(e.target.value);
@@ -38,10 +38,7 @@ function App() {
       .then((res) => {
         if (res.ok) {
           res.json().then((data) => {
-            setProviderData(data.results);
-            setTable(providerData);
-            setTable(data.results.concat(table));
-
+            setProviderData(data.results.concat(providerData));
             setLoading(false);
           });
         }
@@ -51,16 +48,34 @@ function App() {
         console.log(error);
       });
   };
-  const uniqueTable = table.filter((value, index) => {
+  // prevents duplicate keys in table shown
+  const uniqueTable = providerData.filter((value, index) => {
     const _value = JSON.stringify(value);
     return (
       index ===
-      table.findIndex((table) => {
+      providerData.findIndex((table) => {
         return JSON.stringify(table) === _value;
       })
     );
   });
+  // Local Storage Section Check
+  // Runs on page load to check for stored sessions
+  useEffect(() => {
+    if (localStorage.getItem("queries")) {
+      setProviderData(JSON.parse(localStorage.getItem("queries")));
+      console.log(providerData);
+    }
+  }, []);
 
+  // runs every time our table changes and stores the data
+  useEffect(() => {
+    localStorage.setItem("queries", JSON.stringify(providerData));
+  }, [providerData]);
+
+  const clearLocalStorage = () => {
+    localStorage.clear();
+    setProviderData([]);
+  };
   return (
     <Container className="App" maxWidth="xlg">
       <Box className="App-header">
@@ -79,6 +94,15 @@ function App() {
           <Button type="submit" variant="contained" endIcon={<SearchIcon />}>
             Search
           </Button>
+          <Button
+            variant="contained"
+            endIcon={<DeleteIcon />}
+            onClick={clearLocalStorage}
+            color="error"
+            sx={{ marginLeft: 3 }}
+          >
+            Clear
+          </Button>
         </Box>
       </Box>
       {loading === true ? (
@@ -86,7 +110,7 @@ function App() {
           <LinearProgress />
         </Box>
       ) : (
-        table && (
+        providerData && (
           <TableContainer component={Paper} id="table">
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
@@ -104,9 +128,35 @@ function App() {
                     key={provider.number}
                     id={provider.number}
                     name={provider.basic.name}
-                    location={provider.addresses[0].address_1}
+                    location1={`${provider.addresses[0].address_purpose}: ${
+                      provider.addresses[0].address_1
+                    },  ${
+                      provider.addresses[0].address_2
+                        ? provider.addresses[0].address_2 + ","
+                        : ""
+                    } ${provider.addresses[0].city}, ${
+                      provider.addresses[0].state
+                    }, ${provider.addresses[0].postal_code}`}
+                    location2={`${provider.addresses[1].address_purpose}: ${
+                      provider.addresses[1].address_1
+                    },  ${
+                      provider.addresses[1].address_2
+                        ? provider.addresses[1].address_2 + ","
+                        : ""
+                    } ${provider.addresses[1].city}, ${
+                      provider.addresses[1].state
+                    }, ${provider.addresses[1].postal_code}`}
                     type={`${provider.enumeration_type}`}
                     taxonomy={`${provider.taxonomies.map((each) => each.desc)}`}
+                    taxonomyCode={`${provider.taxonomies.map(
+                      (each) => each.code
+                    )}`}
+                    taxonomyPrimary={`${provider.taxonomies.map(
+                      (each) => each.primary
+                    )}`}
+                    taxonomyLicense={`${provider.taxonomies.map(
+                      (each) => each.license
+                    )}`}
                   />
                 ))}
               </TableBody>
