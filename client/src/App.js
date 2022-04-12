@@ -20,13 +20,12 @@ function App() {
   const apiURL = `http://127.0.0.1:3000/providers_search/`;
 
   if (loading === false) {
-    console.log(providerData);
-    console.log(table);
+    // console.log(providerData);
+    // console.log(table);
   }
 
   const handleInput = (e) => {
     setNpi(e.target.value);
-    console.log(npi);
   };
 
   const handleSubmit = (e) => {
@@ -49,6 +48,15 @@ function App() {
         console.log(error);
       });
   };
+  const uniqueTable = table.filter((value, index) => {
+    const _value = JSON.stringify(value);
+    return (
+      index ===
+      table.findIndex((table) => {
+        return JSON.stringify(table) === _value;
+      })
+    );
+  });
 
   return (
     <Container>
@@ -80,7 +88,7 @@ function App() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {table.map((provider) => (
+              {uniqueTable.map((provider) => (
                 <NpiTable
                   key={provider.number}
                   id={provider.number}
