@@ -36,3 +36,7 @@
     transform: rotate(360deg);
   }
 }
+#npi-form {
+  display: flex;
+  flex-direction: row;
+}
