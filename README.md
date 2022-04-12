@@ -1,24 +1,11 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is a mono repo that contains ROR and React on the front end labeled Client.
 
-Things you may want to cover:
+To Run this project:
 
-* Ruby version
+- To start rails server cd to project directory, in the terminal input `rails s`
 
-* System dependencies
+- To start client server cd to project directory, in the terminal input `npm start --prefix client`
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Note: Client server is set up to run on Port 4000
