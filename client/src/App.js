@@ -1,6 +1,12 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Container,
+  LinearProgress,
+  TextField,
+} from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -9,20 +15,17 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import NpiTable from "./NpiTable";
-import SendIcon from "@mui/icons-material/Send";
+import SearchIcon from "@mui/icons-material/Search";
+import logo from "./img/NPI Search-logos_transparent.png";
 
 function App() {
   const [providerData, setProviderData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [npi, setNpi] = useState();
   const [table, setTable] = useState([]);
-  const apiURL = `http://127.0.0.1:3000/providers_search/`;
 
-  if (loading === false) {
-    // console.log(providerData);
-    // console.log(table);
-  }
+  const apiURL = `http://127.0.0.1:3000/providers_search/`;
 
   const handleInput = (e) => {
     setNpi(e.target.value);
@@ -59,7 +62,10 @@ function App() {
   });
 
   return (
-    <Container>
+    <Container className="App" maxWidth="xlg">
+      <Box className="App-header">
+        <img src={logo} alt="" className="App-logo" />
+      </Box>
       <Box id="npi-form" my={3} onSubmit={handleSubmit} component="form">
         <TextField
           id="npi-input"
@@ -70,37 +76,43 @@ function App() {
           sx={{ width: "50%", marginRight: 3 }}
         />
         <Box mt={1}>
-          <Button type="submit" variant="contained" endIcon={<SendIcon />}>
-            Send
+          <Button type="submit" variant="contained" endIcon={<SearchIcon />}>
+            Search
           </Button>
         </Box>
       </Box>
-      {providerData && (
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>NPI</TableCell>
-                <TableCell align="left">Name</TableCell>
-                <TableCell align="left">Address</TableCell>
-                <TableCell align="left">Type</TableCell>
-                <TableCell align="left">Taxonomy</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {uniqueTable.map((provider) => (
-                <NpiTable
-                  key={provider.number}
-                  id={provider.number}
-                  name={`${provider.basic.name_prefix} ${provider.basic.first_name} ${provider.basic.last_name}`}
-                  location={provider.addresses[0].address_1}
-                  type={`${provider.enumeration_type}`}
-                  taxonomy={`${provider.taxonomies.map((each) => each.desc)}`}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+      {loading === true ? (
+        <Box sx={{ width: "100%" }}>
+          <LinearProgress />
+        </Box>
+      ) : (
+        table && (
+          <TableContainer component={Paper} id="table">
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>NPI</TableCell>
+                  <TableCell align="left">Name</TableCell>
+                  <TableCell align="left">Address</TableCell>
+                  <TableCell align="left">Type</TableCell>
+                  <TableCell align="left">Taxonomy</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {uniqueTable.map((provider) => (
+                  <NpiTable
+                    key={provider.number}
+                    id={provider.number}
+                    name={provider.basic.name}
+                    location={provider.addresses[0].address_1}
+                    type={`${provider.enumeration_type}`}
+                    taxonomy={`${provider.taxonomies.map((each) => each.desc)}`}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )
       )}
     </Container>
   );
