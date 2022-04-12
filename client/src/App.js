@@ -1,5 +1,9 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useRef } from "react";
+import NpiTable from "./NpiTable";
+import ReactToPrint from "react-to-print";
+// mui
 import {
   Alert,
   Box,
@@ -7,6 +11,7 @@ import {
   Container,
   LinearProgress,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -15,10 +20,11 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import NpiTable from "./NpiTable";
+// graphics
 import SearchIcon from "@mui/icons-material/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
-import logo from "./img/NPI Search-logos_transparent.png";
+import PrintIcon from "@mui/icons-material/Print";
+import logo from "./img/medical-group.jpg";
 
 function App() {
   const [providerData, setProviderData] = useState([]);
@@ -26,7 +32,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [npi, setNpi] = useState();
-
+  let tableRef = useRef();
   const apiURL = `http://localhost:3000/providers_search/`;
 
   // handles on change for NPI search form
@@ -50,9 +56,10 @@ function App() {
               setNpi("");
             })
             .catch((err) => {
-              setError(err);
+              setError(err.message);
               setHideAlert(false);
               setNpi("");
+              console.log(error);
             });
         }
       });
@@ -114,18 +121,42 @@ function App() {
         </div>
 
         <Box mt={1}>
-          <Button type="submit" variant="contained" endIcon={<SearchIcon />}>
-            Search
-          </Button>
-          <Button
-            variant="contained"
-            endIcon={<DeleteIcon />}
-            onClick={clearLocalStorage}
-            color="error"
-            sx={{ marginLeft: 3 }}
-          >
-            Clear
-          </Button>
+          <Tooltip title="Search for Providers">
+            <Button
+              type="submit"
+              variant="contained"
+              color="info"
+              endIcon={<SearchIcon />}
+            >
+              Search
+            </Button>
+          </Tooltip>
+          <ReactToPrint
+            content={() => tableRef}
+            trigger={() => (
+              <Tooltip title="Print Table">
+                <Button
+                  variant="contained"
+                  endIcon={<PrintIcon />}
+                  color="info"
+                  sx={{ marginLeft: 3 }}
+                >
+                  Print
+                </Button>
+              </Tooltip>
+            )}
+          />
+          <Tooltip title="Clear Current Entries">
+            <Button
+              variant="contained"
+              endIcon={<DeleteIcon />}
+              onClick={clearLocalStorage}
+              color="error"
+              sx={{ marginLeft: 3 }}
+            >
+              Clear
+            </Button>
+          </Tooltip>
         </Box>
       </Box>
       {loading === true ? (
@@ -134,7 +165,11 @@ function App() {
         </Box>
       ) : (
         providerData && (
-          <TableContainer component={Paper} id="table">
+          <TableContainer
+            component={Paper}
+            id="table"
+            ref={(el) => (tableRef = el)}
+          >
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
